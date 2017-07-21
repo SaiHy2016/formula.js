@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>公式组件</title>
+    <style>
+        ul,li{list-style: none}
+        .expr-symbol,.expr-fields{
+            padding-left: 4em;
+        }
+        .expr-element,.expr-field{
+            color: #fff;
+            display: inline-block;
+            background-color: #cc5500;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            vertical-align: middle;
+            white-space: nowrap;
+            position: relative
+        }
+        .expr-field{
+            background: #dd1144;
+        }
+        .expr-disp{
+            border: 1px solid #ccc;
+            margin-left: 4em;
+            min-height: 1em;
+            padding: 1em;
+            display: inline-block;
+            min-width:400px;
+        }
+        .expr-disp span.expr-colse{
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+            background: #000;
+            border-radius: 50%;
+            margin: -8px -8px 0 0;
+            text-align: center;
+            cursor: default;
+        }
+
+        .preViewRes{
+            color: #d32;
+            font-size: 18px;
+        }
+        .add-field{
+            padding-left: 4em;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div id='container'>
+            <!-- <div class="expr-elements">
+                <div>字段</div>
+                <ul class="expr-fields">
+                    <li class="ui-draggable ui-draggable-handle">测试数字加减</li>
+                </ul>
+            </div>
+            <div class="expr-elements">
+                <div>运算符</div>
+                <ul class="expr-operators">
+                    <li data-value="+" class="ui-draggable ui-draggable-handle">加＋</li>
+                    <li data-value="-" class="ui-draggable ui-draggable-handle">减－</li>
+                    <li data-value="*" class="ui-draggable ui-draggable-handle">乘×</li>
+                    <li data-value="/" class="ui-draggable ui-draggable-handle">除÷</li>
+                    <li data-value="@" class="ui-draggable ui-draggable-handle">汇总</li>
+                    <li data-value="#" class="ui-draggable ui-draggable-handle">计数</li>
+                    <li data-value="(" class="ui-draggable ui-draggable-handle">左括号 (</li>
+                    <li data-value=")" class="ui-draggable ui-draggable-handle">右括号 )</li>
+                </ul>
+            </div>
+            <div>
+                <div class="expr-leftop">公式为：</div>
+                <ul class="expr-disp ui-sortable"></ul>
+                <div class="expr-error"></div>
+            </div> -->
+    </div>
+    <script src='js/jquery.min.js'></script>
+    <script src='js/jquery-ui.js'></script>
+    <script src='js/formula.js'></script>
+    <script>
+        $('#container').formula({
+            disp:'f1+123+f2-[count,f1]*[sum,f3]/f1'
+        })
+    </script>
+</body>
+</html>
