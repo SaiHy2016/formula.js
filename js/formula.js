@@ -127,7 +127,8 @@ $.widget("custom.formula", {
                     if (this._inSymbol(arr[i + 1])) {
                         return { result: false, msg:'汇总或者计数后面只能跟字段'}
                     } else {
-                        arr.splice(i,2,1)
+                        arr.splice(i, 2, '(',1,')')
+                        // if(!this._inSymbol(arr[i+1]))
                     }
                 } else if (arr[i] == '+' || arr[i] == '-' || arr[i] == '*' || arr[i] == '/') {
                     arr[i]='+'
@@ -135,7 +136,12 @@ $.widget("custom.formula", {
             } else {//字段
                 if (i + 1 < arr.length) {
                     if (this._inSymbol(arr[i + 1])) {
-
+                        if (arr[i + 1]=='[count,'||arr[i+1]=='[sum,') {
+                            return {
+                                result: false,
+                                msg: '字段后面不能跟汇总或计数'
+                            }
+                        }
                     } else if (typeof arr[i + 1] == 'number') {
 
                     } else {
@@ -148,7 +154,6 @@ $.widget("custom.formula", {
                 arr[i]=1
             }
         }
-        console.log(arr)
         try {
             var result = eval(arr.join(''))
         } catch(err){
@@ -214,7 +219,6 @@ $.widget("custom.formula", {
         return false
     },
     _parse: function (str) {//解析表达式 如 1+2+[sum,e] 解析为参数下标
-            str=str||this.getFormulaStr()
         var symbol = this.options.symbol
 
         str = this._parseSymbol(this._parseArg(str))
