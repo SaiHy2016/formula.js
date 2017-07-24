@@ -256,9 +256,7 @@ $.widget("custom.formula", {
         var symbol = this.options.symbol
         for (var j = 0; j < symbol.length; j++) {
             var sym = symbol[j],
-                reg,
-
-            reg = new RegExp('\\' + sym.sign, 'g')
+                reg = new RegExp('\\' + sym.sign, 'g')
             if (reg.test(str)) {
                 str = str.replace(reg, ' s' + j + ' ')
                 str = str.replace(/]/g, '')
