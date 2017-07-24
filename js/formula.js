@@ -48,7 +48,7 @@ $.widget("custom.formula", {
         var html ='<div class="expr-elements"><div>字段: </div> <ul class="expr-fields"></ul><div class="add-field"></div></div><div class="expr-elements"><div>运算符</div><ul class="expr-symbol"></ul></div><div><div class = "expr-leftop">公式为：<span class="preViewRes"></span></div><ul class="expr-disp"></ul><div class = "expr-error"></div><button class="test">test</button></div>'
         this.element.html(html)
     },
-         //创建控件，控件生命周期内会运行多次
+    //创建控件，控件生命周期内会运行多次
     _init: function () { //初始化数据
         console.log('组件init')
         var op = this.options,
@@ -83,9 +83,11 @@ $.widget("custom.formula", {
             var str = me.getFormulaStr()
             $('.preViewRes', $el).html(str)
             var res = me.checkout()
-            if (!res.result) { $('.expr-error', $el).html(res.msg) }
-            else {
+            if (res.result) {
                 $('.expr-error', $el).html('')
+            }
+            else {
+                $('.expr-error', $el).html(res.msg)
             }
         })
 
@@ -117,6 +119,10 @@ $.widget("custom.formula", {
     },
     checkout: function () { //检查公式是否合法 返回布尔型
         var arr = this.getFormulaArr()
+        if (arr.length == 0) return {
+            result: true,
+            msg: ''
+        }
         for (var i = 0; i < arr.length; i++){
             if (this._inSymbol(arr[i])) {//运算符
                 if (arr[i] == '[count,' || arr[i] == '[sum,') {
