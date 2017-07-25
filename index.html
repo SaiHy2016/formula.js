@@ -28,13 +28,12 @@
         }
         .expr-disp{
             border: 1px solid #ccc;
-            margin-left: 4em;
             min-height: 1em;
             padding: 1em;
             display: inline-block;
             min-width:400px;
         }
-        .expr-disp span.expr-colse{
+            .expr-disp span.expr-colse,.expr-equ .expr-colse{
             position: absolute;
             top: 0;
             right: 0;
@@ -59,6 +58,23 @@
             color: red;
             padding-left: 4em;
         }
+        .expr-disp .expr-colse,.expr-equ .expr-colse{
+            display: none;
+        }
+        .expr-disp li:hover .expr-colse,.expr-equ li:hover .expr-colse{
+            display: block
+        }
+        .expr-equ,.expr-disp{
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 10px
+        }
+        .expr-equ{
+            border: 1px solid #ccc;
+            min-width: 60px;
+            min-height: 1em;
+            padding: 1em;
+        }
 
     </style>
 </head>
@@ -69,7 +85,8 @@
     <script src='js/formula.js'></script>
     <script>
         $('#container').formula({
-            // disp:'f1 + (123 + f2) - [count,f1] * [sum,f3] / f1'
+            // disp:'f1=f1+(123 + f2) -  [sum,f3] / f1',
+            mode:'equation'
         })
     </script>
 </body>
