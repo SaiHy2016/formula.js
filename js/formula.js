@@ -45,12 +45,23 @@ $.widget("bangboss.formula", {
         },
         disp: '', //表达式缓存
         mode: 'default',  // default,equation
+        selector: {
+            fields: '.expr-fields',
+            field: '.expr-field',
+            symbols: '.expr-symbol',
+            symbol: '.expr-element',
+            formulaView: '.preViewRes',
+            equ: '.expr-equ',
+            disp: '.expr-disp',
+            err: '.expr-error'
+        }
     },
     _create: function () { //初始化，控件生命周期内只运行一次
         console.log('组件create')
-        var op=this.options
+        var op = this.options,
+            s = this.options.selector
 
-        var html = '<div class="expr-elements"><div>字段: </div> <ul class="expr-fields"></ul>'+(op.addField.addable?'<div class="'+op.addField.selector.slice(1)+'"></div>':'')+'</div><div class="expr-elements"><div>运算符</div><ul class="expr-symbol"></ul></div><div><div class = "expr-leftop">公式为：<span class="preViewRes"></span></div>'+(op.mode=='default'?'':'<ul class="expr-equ"></ul>=')+'<ul class="expr-disp"></ul><div class = "expr-error"></div><button class="test">test</button></div>'
+        var html = '<div class="expr-elements"><div>字段: </div> <ul class="'+s.fields.slice(1)+'"></ul>'+(op.addField.addable?'<div class="'+op.addField.selector.slice(1)+'"></div>':'')+'</div><div class="expr-elements"><div>运算符</div><ul class="'+s.symbols.slice(1)+'"></ul></div><div><div class = "expr-leftop">公式为：<span class="'+s.formulaView.slice(1)+'"></span></div>'+(op.mode=='default'?'':'<ul class="'+s.equ.slice(1)+'"></ul>=')+'<ul class="'+s.disp.slice(1)+'"></ul><div class = "'+s.err.slice(1)+'"></div><button class="test">test</button></div>'
 
         this.element.html(html)
     },
@@ -60,16 +71,15 @@ $.widget("bangboss.formula", {
         var op = this.options,
             html = '',
             $el = this.element,
-            me=this
+            me = this,
+            s=op.selector
 
-            console.log($el.attr('id'))
-            console.log($el)
         console.log(op)
         //加载字段
         $.each(op.arg, function (i, v) {
             html += '<li data-value="' + v.id + '" class="expr-field">' + v.name + '</li>'
         })
-        $('.expr-fields', $el).html(html)
+        $(s.fields, $el).html(html)
 
         //加载新增字段
         if (op.addField.addable) {
@@ -81,7 +91,7 @@ $.widget("bangboss.formula", {
         $.each(op.symbol, function (i, v) {
             html += '<li data-value = "' +v.sign + '" class = "expr-element" >' + v.name + '</li>'
         })
-        $('.expr-symbol', $el).html(html)
+        $(s.symbols, $el).html(html)
 
         //绑定拖拽点击事件
         this._bindEvent()
@@ -89,13 +99,13 @@ $.widget("bangboss.formula", {
         //test按钮
         $('button.test', $el).click(function () {
             var str = me.getFormulaStr()
-            $('.preViewRes', $el).html(str)
+            $(s.formulaView, $el).html(str)
             var res = me.checkout()
             if (res.success) {
-                $('.expr-error', $el).html('')
+                $(s.err, $el).html('')
             }
             else {
-                $('.expr-error', $el).html(res.msg)
+                $(s.err, $el).html(res.msg)
             }
         })
 
@@ -106,22 +116,24 @@ $.widget("bangboss.formula", {
             console.log(h)
             if (op.mode == 'equation') {
                 var o = this._toHTML(h)
-                $('.expr-equ', $el).html(o.equ)
-                $('.expr-disp', $el).html(o.disp)
+                $(s.equ, $el).html(o.equ)
+                $(s.disp, $el).html(o.disp)
             } else {
-                $('.expr-disp', $el).html(this._toHTML(h))
+                $(s.disp, $el).html(this._toHTML(h))
             }
         }
     },
     getFormulaArr:function(){//获取公式数组 Array
-        var res = []
+        var res = [],
+            op = this.options,
+            s = this.options.selector
         //equation模式
-        if (this.options.mode == 'equation') {
-            res.push($('.expr-equ li', this.element).attr('data-value'))
+        if (op.mode == 'equation') {
+            res.push($(s.disp+' li', this.element).attr('data-value'))
             res.push('=')
         }
 
-        $('.expr-disp li', this.element).each(function (i, v) {
+        $(s.disp+' li', this.element).each(function (i, v) {
             res.push(v.getAttribute('data-value'))
         })
         return res
@@ -252,33 +264,38 @@ $.widget("bangboss.formula", {
     },
     _bindEvent: function () {//绑定拖拽点击事件
         var me = this,
-            $el=this.element
-        $('.expr-element,.expr-field', $el).draggable({
+            $el = this.element,
+            op = this.options,
+            s = op.selector
+
+        $(s.symbol+','+s.field, $el).draggable({
             revert: "invalid",
             helper: 'clone',
             containment: this.element,
-            connectToSortable: '.expr-disp,.expr-equ',
+            connectToSortable: s.disp+','+s.equ,
             zIndex:1
         }).disableSelection().click(function (e) {
-            var el, $me = $(this)
-            if ($me.hasClass('expr-element')) {//符号
+            var el,
+                $me = $(this)
+
+            if ($me.hasClass(s.symbol.slice(1))) {//符号
                 if ($me.text() == '汇总') {
                     el = $me.clone(false).append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>')
                 } else {
                     el = $me.clone(false).html($me.attr('data-value') + '<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>')
                 }
-                    $('.expr-disp', $el).append(el)
+                    $(s.disp, $el).append(el)
             }else{//字段
                 el = $me.clone(false).append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>')
-                if ($('.expr-equ li', $el).length == 0) {
-                    $('.expr-equ', $el).append(el)
+                if ($(s.equ+' li', $el).length == 0) {
+                    $(s.equ, $el).append(el)
                 } else {
-                    $('.expr-disp', $el).append(el)
+                    $(s.disp, $el).append(el)
                 }
             }
 
         })
-        $('.expr-disp', $el).empty().sortable({
+        $(s.disp, $el).empty().sortable({
             cancel: ".expr-colse",
             // connectWith: '.expr-equ',
             receive: function (e, ui) {
@@ -291,11 +308,10 @@ $.widget("bangboss.formula", {
             }
         })
 
-        if (this.options.mode == 'equation') { //等号模式
-            $('.expr-element', $el).draggable("option", "connectToSortable", '.expr-disp');
-            $('.expr-equ', $el).empty().sortable({
+        if (op.mode == 'equation') { //等号模式
+            $(s.symbol, $el).draggable("option", "connectToSortable", s.disp);
+            $(s.equ, $el).empty().sortable({
                 cancel: ".expr-colse",
-                // connectWith:'.expr-disp',
                 receive: function (e, ui) {
                     if ($('li', this).length>0) {
                         $(this).html(ui.helper.append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>'))
@@ -307,28 +323,27 @@ $.widget("bangboss.formula", {
         }
 
         //add按钮
-        if(this.options.addField.addable)
-            $(this.options.addField.selector+' button.add-btn', $el).click(function () {
+        if(op.addField.addable)
+            $(op.addField.selector+' button.add-btn', $el).click(function () {
                 var $input = $(this).prev('input'),
                     val = $input.val()
                 $input.val('')
                 if (val && !isNaN(val)) {
-                    $('.expr-error', $el).html('')
+                    $(s.err, $el).html('')
 
-                    $('<li data-value = "' + val + '" class = "expr-field" >' + val + '</li>').draggable({
+                    $('<li data-value = "' + val + '" class = "'+s.field.slice(1)+'" >' + val + '</li>').draggable({
                         revert: "invalid",
                         helper: 'clone',
                         containment: this.element,
-                        connectToSortable: '.expr-disp'
+                        connectToSortable: s.disp
                     })
                     .disableSelection()
                     .click(function (e) {
-                        $('.expr-disp', $el).append($(this).clone().append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>'))
+                        $(s.disp, $el).append($(this).clone().append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>'))
                         })
-                        .appendTo($('.expr-fields', $el))
-                    // me.options.arg.push({name:val,data:val})
+                        .appendTo($(s.fields, $el))
                 } else {
-                    $('.expr-error',$el).html('请输入正确的常数')
+                    $(s.err,$el).html('请输入正确的常数')
                 }
             })
     },
