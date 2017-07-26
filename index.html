@@ -69,6 +69,9 @@
             vertical-align: middle;
             margin: 0 10px
         }
+        .expr-equ li,.expr-disp li{
+            margin-bottom: 0
+        }
         .expr-equ{
             border: 1px solid #ccc;
             min-width: 60px;
@@ -85,7 +88,7 @@
     <script src='js/formula.js'></script>
     <script>
         $('#container').formula({
-            // disp:'f1=f1+(123 + f2) -  [sum,f3] / f1',
+            // disp:'f1=f1+(bc + f2) - [sum,f3] / f1',
             mode:'equation'
         })
     </script>

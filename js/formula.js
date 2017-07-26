@@ -40,15 +40,17 @@ $.widget("bangboss.formula", {
             }],
         addField: {
             addable: true,
+            selector: '.add-field',
             text: '增加常量'  //button上的文字
         },
         disp: '', //表达式缓存
-        mode: 'default'  // default,equation
+        mode: 'default',  // default,equation
     },
     _create: function () { //初始化，控件生命周期内只运行一次
         console.log('组件create')
+        var op=this.options
 
-        var html = '<div class="expr-elements"><div>字段: </div> <ul class="expr-fields"></ul><div class="add-field"></div></div><div class="expr-elements"><div>运算符</div><ul class="expr-symbol"></ul></div><div><div class = "expr-leftop">公式为：<span class="preViewRes"></span></div>'+(this.options.mode=='default'?'':'<ul class="expr-equ"></ul>=')+'<ul class="expr-disp"></ul><div class = "expr-error"></div><button class="test">test</button></div>'
+        var html = '<div class="expr-elements"><div>字段: </div> <ul class="expr-fields"></ul>'+(op.addField.addable?'<div class="'+op.addField.selector.slice(1)+'"></div>':'')+'</div><div class="expr-elements"><div>运算符</div><ul class="expr-symbol"></ul></div><div><div class = "expr-leftop">公式为：<span class="preViewRes"></span></div>'+(op.mode=='default'?'':'<ul class="expr-equ"></ul>=')+'<ul class="expr-disp"></ul><div class = "expr-error"></div><button class="test">test</button></div>'
 
         this.element.html(html)
     },
@@ -60,6 +62,8 @@ $.widget("bangboss.formula", {
             $el = this.element,
             me=this
 
+            console.log($el.attr('id'))
+            console.log($el)
         console.log(op)
         //加载字段
         $.each(op.arg, function (i, v) {
@@ -69,7 +73,7 @@ $.widget("bangboss.formula", {
 
         //加载新增字段
         if (op.addField.addable) {
-            $('.add-field', $el).html('<input type="number"><button class="add-btn">' + op.addField.text+ '</button>')
+            $(op.addField.selector, $el).html('<input type="number"><button class="add-btn">' + op.addField.text + '</button>')
         }
 
         //加载运算符
@@ -211,6 +215,10 @@ $.widget("bangboss.formula", {
     },
     calc:function(str,o){//str为表达式 o为传入的数据{id1:number,id2:number}
         var res
+        //如果是×或÷格式替换
+        str = str.replace(/[\*]/g, '×')
+        str = str.replace(/[\/]/g, '÷')
+
         for (var k in o) {
             var reg = new RegExp(k, 'g')
             if (reg.test(str)) {
@@ -249,7 +257,8 @@ $.widget("bangboss.formula", {
             revert: "invalid",
             helper: 'clone',
             containment: this.element,
-            connectToSortable: '.expr-disp,.expr-equ'
+            connectToSortable: '.expr-disp,.expr-equ',
+            zIndex:1
         }).disableSelection().click(function (e) {
             var el, $me = $(this)
             if ($me.hasClass('expr-element')) {//符号
@@ -299,11 +308,13 @@ $.widget("bangboss.formula", {
 
         //add按钮
         if(this.options.addField.addable)
-            $('button.add-btn', $el).click(function () {
+            $(this.options.addField.selector+' button.add-btn', $el).click(function () {
                 var $input = $(this).prev('input'),
                     val = $input.val()
-                    $input.val('')
-                if (val) {
+                $input.val('')
+                if (val && !isNaN(val)) {
+                    $('.expr-error', $el).html('')
+
                     $('<li data-value = "' + val + '" class = "expr-field" >' + val + '</li>').draggable({
                         revert: "invalid",
                         helper: 'clone',
@@ -312,10 +323,12 @@ $.widget("bangboss.formula", {
                     })
                     .disableSelection()
                     .click(function (e) {
-                        $('.expr-disp', this.element).append($(this).clone().append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>'))
+                        $('.expr-disp', $el).append($(this).clone().append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>'))
                         })
                         .appendTo($('.expr-fields', $el))
                     // me.options.arg.push({name:val,data:val})
+                } else {
+                    $('.expr-error',$el).html('请输入正确的常数')
                 }
             })
     },
@@ -373,7 +386,12 @@ $.widget("bangboss.formula", {
             }
 
         } else {
-            return arr.join('')
+            var i = $.inArray('=', arr)
+            if (i == -1) {
+                return arr.join('')
+            } else {
+                return arr.slice(i + 1).join('')
+            }
         }
     },
     _doit: function (arr) {
