@@ -25,9 +25,20 @@
 			text: 'button文本'
 		},
 
-		disp: '' //表达式缓存，设置后可以初始化表达式内容
+		disp: '', //表达式缓存，设置后可以初始化表达式内容
 
-		mode: 'default'  // default,equation
+		mode: 'default',  // default,equation
+
+		selector:{	//选择器默认值
+			fields: '.expr-fields',
+            field: '.expr-field',
+            symbols: '.expr-symbol',
+            symbol: '.expr-sign',
+            formulaView: '.preViewRes',
+            equ: '.expr-equ',
+            disp: '.expr-disp',
+            err: '.expr-error'
+		}
 	}
 
 外部api:
