@@ -49,7 +49,7 @@ $.widget("bangboss.formula", {
             fields: '.expr-fields',
             field: '.expr-field',
             symbols: '.expr-symbol',
-            symbol: '.expr-element',
+            symbol: '.expr-sign',
             formulaView: '.preViewRes',
             equ: '.expr-equ',
             disp: '.expr-disp',
@@ -89,7 +89,7 @@ $.widget("bangboss.formula", {
         //加载运算符
         html = ''
         $.each(op.symbol, function (i, v) {
-            html += '<li data-value = "' +v.sign + '" class = "expr-element" >' + v.name + '</li>'
+            html += '<li data-value = "' +v.sign + '" class = "'+s.symbol.slice(1)+'" >' + v.name + '</li>'
         })
         $(s.symbols, $el).html(html)
 
@@ -410,17 +410,20 @@ $.widget("bangboss.formula", {
         }
     },
     _doit: function (arr) {
-        var  arg = this.options.arg, symbol = this.options.symbol
+        var op = this.options,
+            arg = op.arg,
+            symbol = op.symbol,
+            s = op.selector
         for (var i = 0; i < arr.length; i++) {
             var v = arr[i]
             if (v[0] == 'a') {
                 var k = v[1]
-                arr[i]= '<li data-value="'+arg[k].id+'" class="expr-field">'+arg[k].name+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
+                arr[i]= '<li data-value="'+arg[k].id+'" class="'+s.field.slice(1)+'">'+arg[k].name+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
             } else if (v[0] == 's') {
                 var k = v[1]
-                arr[i]= '<li data-value="'+symbol[k].sign+'" class="expr-element">'+(symbol[k].sign=='[sum,'?'汇总':symbol[k].sign)+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
+                arr[i]= '<li data-value="'+symbol[k].sign+'" class="'+s.symbol.slice(1)+'">'+(symbol[k].sign=='[sum,'?'汇总':symbol[k].sign)+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
             } else if(v!='='){
-                arr[i]= '<li data-value="'+v+'" class="expr-field">'+v+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
+                arr[i]= '<li data-value="'+v+'" class="'+s.field.slice(1)+'">'+v+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
             }
         }
         return arr
