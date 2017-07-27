@@ -99,6 +99,7 @@ $.widget("bangboss.formula", {
         //test按钮
         $('button.test', $el).click(function () {
             var str = me.getFormulaStr()
+            console.log(str)
             $(s.formulaView, $el).html(str)
             var res = me.checkout()
             if (res.success) {
@@ -129,7 +130,7 @@ $.widget("bangboss.formula", {
             s = this.options.selector
         //equation模式
         if (op.mode == 'equation') {
-            res.push($(s.disp+' li', this.element).attr('data-value'))
+            res.push($(s.equ+' li', this.element).attr('data-value'))
             res.push('=')
         }
 
