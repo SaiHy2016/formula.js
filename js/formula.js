@@ -398,10 +398,10 @@ $.widget("bangboss.formula", {
         var  arg = this.options.arg, symbol = this.options.symbol
         for (var i = 0; i < arr.length; i++) {
             var v = arr[i]
-            if (v[0] == 'a') {
+            if (v[0] == 'A') {
                 var k = v[1]
                 arr[i]= '<li data-value="'+arg[k].id+'" class="expr-field">'+arg[k].name+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
-            } else if (v[0] == 's') {
+            } else if (v[0] == 'S') {
                 var k = v[1]
                 arr[i]= '<li data-value="'+symbol[k].sign+'" class="expr-element">'+(symbol[k].sign=='[sum,'?'汇总':symbol[k].sign)+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
             } else if(v!='='){
@@ -416,7 +416,7 @@ $.widget("bangboss.formula", {
             var v = arg[i],
                 reg = new RegExp(v.id, 'g')
             if (reg.test(str)) {
-                str = str.replace(reg, ' a' + i + ' ')
+                str = str.replace(reg, ' A' + i + ' ')
             }
         }
         console.log('parseArg '+str)
@@ -428,7 +428,7 @@ $.widget("bangboss.formula", {
             var sym = symbol[j],
                 reg = new RegExp('\\' + sym.sign, 'g')
             if (reg.test(str)) {
-                str = str.replace(reg, ' s' + j + ' ')
+                str = str.replace(reg, ' S' + j + ' ')
                 str = str.replace(/]/g, '')
             }
         }
