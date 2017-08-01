@@ -80,28 +80,41 @@
         }
 
     </style> -->
+    <style>
+        body{
+            padding: 60px;
+        }
+    </style>
     <link rel="stylesheet" href="css/formula.css">
 </head>
 <body>
-<<<<<<< HEAD
     <div id='container'></div>
-    <p></p>
-=======
-    <div id='formula'></div>
->>>>>>> 3050006... 组件化
     <script src='js/jquery.min.js'></script>
     <script src='js/jquery-ui.js'></script>
     <script src='js/formula.js'></script>
     <script>
-<<<<<<< HEAD
         $('#container').formula({
-            // disp:'f1=f1+(123 + f2) - [sum,f3] / f1',
-=======
-        $('#formula').formula({
-            // disp:'f1=f1+(bc + f2) - [sum,f3] / f1',
->>>>>>> 3050006... 组件化
+            disp:'f1=f1+(100+ f2) - [sum,f3] / f1',
             mode:'equation'
         })
+        $('#container').formula('addError',function () {
+                alert('添加失败')
+         })
+        $('#container').formula('addError',function () {
+                alert('添加失败2')
+         })
+        $('#container').formula('saveSuccess',function (str) {
+                alert('保存成功')
+                alert(str)
+         })
+        $('#container').formula('saveSuccess',function (str) {
+                alert('保存成功1')
+                alert(str)
+         })
+        $('#container').formula('saveError',function (msg) {
+                alert('保存失败')
+                alert(msg)
+         })
     </script>
 </body>
 </html>

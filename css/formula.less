@@ -1,7 +1,154 @@
 @baseColor:#649efd;
-@fontColor:#fff;
+@signColor:#649efd;
+@fontColor:#545454;
 
-
-#formula{
-
+.formula{
+    ul{padding-left: 0;margin: 0}
+    .expr-field{
+        min-width: 40px;
+        padding:0 20px;
+        height: 30px;
+        line-height: 30px;
+        background-color: @baseColor;
+        color: #fff;
+        border-radius: 2px;
+        margin-right:20px;
+        display: inline-block;
+        vertical-align: middle;
+        text-align: center;
+        cursor: pointer;
+        position: relative;
+    }
+    .expr-sign{
+        width: 40px;
+        height: 40px;
+        border: 1px solid @signColor;
+        line-height: 40px;
+        font-size: 20px;
+        cursor: pointer;
+        display: inline-block;
+        vertical-align: middle;
+        text-align: center;
+        color:@signColor;
+        margin-right: 20px;
+        background-color: #fff;
+        border-radius: 2px;
+        position:relative;
+    }
+    .formula-text{
+        color: @fontColor;
+        margin-bottom: 15px;
+    }
+    .expr-fields,.expr-symbol{
+        margin-bottom:22px;
+    }
+    .add-field{
+        margin-bottom:40px;
+        *{box-sizing: border-box}
+        input{
+            border: 1px solid @baseColor;
+            height: 30px;
+            margin-right: 10px;
+            outline: none;
+            padding: 10px;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        }
+        .add-btn{
+            .expr-field;
+            border: none;
+            height: 30px;
+            padding: 0 15px;
+            outline: none;
+        }
+    }
+    .expr-equ,.expr-disp{
+        border: 1px dotted @baseColor;
+        border-radius: 2px;
+    }
+    .expr-equ{
+        display: inline-block;
+        min-width: 80px;
+        min-height: 30px;
+        vertical-align: middle;
+        .expr-field{
+            margin: 0;
+            border-radius: 0;
+        }
+    }
+    .expr-disp{
+        display: inline-block;
+        min-height: 30px;
+        min-width: 80px;
+        vertical-align: middle;
+        // border: none;
+        .expr-sign{
+            box-sizing: border-box;
+            height: 30px;
+            line-height: 28px;
+            margin-right: 0;
+            border-radius: 0;
+        }
+        .expr-field{
+            margin: 0;
+            border-radius: 0;
+        }
+    }
+    .expr-close{
+        display: none;
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+        background: @fontColor;
+        border-radius: 50%;
+        color: #fff;
+        position: absolute;
+        right:0;
+        top: 0;
+        margin: -8px -8px 0 0;
+    }
+    .expr-field:hover .expr-close,.expr-sign:hover .expr-close{
+        display: block;
+        z-index: 1;
+    }
+    .formula-equ{
+        display: inline-block;
+        vertical-align: middle;
+        height: 30px;
+        padding: 0 10px;
+        line-height: 30px;
+        color: @baseColor;
+        font-size: 36px;
+    }
+    .expr-error{
+        color: red;
+    }
+    .formula-save{
+        background-color:@baseColor;
+        width: 120px;
+        height: 40px;
+        line-height: 40px;
+        border-radius: 4px;
+        color: #fff;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        &:hover{
+            background-color: darken(@baseColor,3%);
+        }
+        &:active{
+            background-color: darken(@baseColor,5%);
+        }
+    }
+    .expr-field:hover,.add-btn:hover{
+        background-color: darken(@baseColor,5%);
+    }
+    .expr-sign:hover{
+        background-color:#fdfdfd;
+    }
+    .formula-bottom{
+        margin-bottom: 20px;
+    }
 }

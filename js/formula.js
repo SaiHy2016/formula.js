@@ -12,31 +12,31 @@ $.widget("bangboss.formula", {
                 id: 'f3'
             }],
         symbol: [{
-                name: '加+',
+                name: '+',
                 sign: '+'
             },{
-                name: '减-',
+                name: '-',
                 sign: '-'
             }, {
-                name: '乘×',
+                name: '×',
                 sign: '×'
             }, {
-                name: '除÷',
+                name: '÷',
                 sign: '÷'
-            }, {
-                name: '汇总',
-                sign: '[sum,'
             }
             // , {
             //     name: '计数',
             //     sign: '[count,'
             // }
             , {
-                name: '左括号(',
+                name: '(',
                 sign: '('
             }, {
-                name: '右括号)',
+                name: ')',
                 sign: ')'
+            }, {
+                name: '∑',
+                sign: '[sum,'
             }],
         addField: {
             addable: true,
@@ -54,27 +54,24 @@ $.widget("bangboss.formula", {
             equ: '.expr-equ',
             disp: '.expr-disp',
             err: '.expr-error'
-        }
+        },
+        _:{adderr:[],save:[],saveErr:[]}
     },
     _create: function () { //初始化，控件生命周期内只运行一次
-        console.log('组件create')
         var op = this.options,
             s = this.options.selector
 
-        var html = '<div class="expr-elements"><div>字段: </div> <ul class="'+s.fields.slice(1)+'"></ul>'+(op.addField.addable?'<div class="'+op.addField.selector.slice(1)+'"></div>':'')+'</div><div class="expr-elements"><div>运算符</div><ul class="'+s.symbols.slice(1)+'"></ul></div><div><div class = "expr-leftop">公式为：<span class="'+s.formulaView.slice(1)+'"></span></div>'+(op.mode=='default'?'':'<ul class="'+s.equ.slice(1)+'"></ul>=')+'<ul class="'+s.disp.slice(1)+'"></ul><div class = "'+s.err.slice(1)+'"></div><button class="test">test</button></div>'
+        var html = '<div class="expr-elements"><div class="formula-text">字段: </div> <ul class="' + s.fields.slice(1) + '"></ul>' + (op.addField.addable ? '<div class="' + op.addField.selector.slice(1) + '"></div>' : '') + '</div><div class="expr-elements"><div class="formula-text">运算符</div><ul class="' + s.symbols.slice(1) + '"></ul></div><div class="formula-bottom"><div class = "expr-leftop formula-text">公式为：<span class="' + s.formulaView.slice(1) + '"></span></div>' + (op.mode == 'default' ? '' : '<ul class="' + s.equ.slice(1) + '"></ul><span class="formula-equ">=</span>') + '<ul class="' + s.disp.slice(1) + '"></ul><div class = "' + s.err.slice(1) + '"></div></div><button class="formula-save">保存</button>'
 
-        this.element.html(html)
+        this.element.html(html).addClass('formula')
     },
     //创建控件，控件生命周期内会运行多次
     _init: function () { //初始化数据
-        console.log('组件init')
         var op = this.options,
             html = '',
             $el = this.element,
             me = this,
             s=op.selector
-
-        console.log(op)
         //加载字段
         $.each(op.arg, function (i, v) {
             html += '<li data-value="' + v.id + '" class="expr-field">' + v.name + '</li>'
@@ -96,25 +93,26 @@ $.widget("bangboss.formula", {
         //绑定拖拽点击事件
         this._bindEvent()
 
-        //test按钮
-        $('button.test', $el).click(function () {
+        //save按钮
+        $('button.formula-save', $el).click(function () {
             var str = me.getFormulaStr()
-            console.log(str)
-            $(s.formulaView, $el).html(str)
+            // $(s.formulaView, $el).html(str)
             var res = me.checkout()
             if (res.success) {
-                $(s.err, $el).html('')
+                // $(s.err, $el).html('')
+                $.each(op._.save,function (i,v) { v(str) })
             }
             else {
-                $(s.err, $el).html(res.msg)
+                // $(s.err, $el).html(res.msg)
+                $.each(op._.saveErr, function (i, v) {
+                    v(res.msg)
+                })
             }
         })
 
         //最后加载加载公式
         if (op.disp) {
-            console.log(op.disp)
             var h = this._parse(op.disp)
-            console.log(h)
             if (op.mode == 'equation') {
                 var o = this._toHTML(h)
                 $(s.equ, $el).html(o.equ)
@@ -145,10 +143,7 @@ $.widget("bangboss.formula", {
             if (v == '[sum,') {
                 arr.splice(i + 2, 0, ']')
             }
-            // } else if (v == '[count,') {
-            //     arr.splice(i + 2, 0, ']')
-            // }
-            if (bool) {
+            if (!bool) {
                 if (v == '×') {
                     arr[i]='*'
                 } else if (v =='÷'){
@@ -239,7 +234,6 @@ $.widget("bangboss.formula", {
             }
         }
         str = this._parseSum(str)
-        console.log(str)
         try {
              res=eval(str)
         } catch (err) {
@@ -254,6 +248,12 @@ $.widget("bangboss.formula", {
             sum+=arg[i]
         }
         return sum
+    },
+    saveSuccess: function (fn) {
+        this.options._.save.push(fn)
+    },
+    saveError: function (fn) {
+        this.options._.saveErr.push(fn)
     },
     _parseSum: function (str) {
         var reg =/\[sum,/g
@@ -280,44 +280,48 @@ $.widget("bangboss.formula", {
                 $me = $(this)
 
             if ($me.hasClass(s.symbol.slice(1))) {//符号
-                if ($me.text() == '汇总') {
-                    el = $me.clone(false).append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>')
+                if ($me.text() == '∑') {
+                    el = $me.clone(false).append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
                 } else {
-                    el = $me.clone(false).html($me.attr('data-value') + '<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>')
+                    el = $me.clone(false).html($me.attr('data-value') + '<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
                 }
                     $(s.disp, $el).append(el)
             }else{//字段
-                el = $me.clone(false).append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>')
-                if ($(s.equ+' li', $el).length == 0) {
-                    $(s.equ, $el).append(el)
+                el = $me.clone(false).append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
+                if (op.mode == 'equation') {
+                    if ($(s.equ + ' li', $el).length == 0) {
+                        $(s.equ, $el).append(el)
+                    } else {
+                        $(s.disp, $el).append(el)
+                    }
                 } else {
-                    $(s.disp, $el).append(el)
+                        $(s.disp, $el).append(el)
                 }
             }
 
         })
         $(s.disp, $el).empty().sortable({
-            cancel: ".expr-colse",
+            cancel: ".expr-close",
             // connectWith: '.expr-equ',
             receive: function (e, ui) {
                 var li = ui.helper,text = li.text()
 
-                if (me._inSymbol(text, true) && text != '汇总') {
+                if (me._inSymbol(text, true) && text != '∑') {
                     li.text(li.attr('data-value')).attr('style', '')
                 }
-                ui.helper.append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>')
+                ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
             }
         })
 
         if (op.mode == 'equation') { //等号模式
             $(s.symbol, $el).draggable("option", "connectToSortable", s.disp);
             $(s.equ, $el).empty().sortable({
-                cancel: ".expr-colse",
+                cancel: ".expr-close",
                 receive: function (e, ui) {
                     if ($('li', this).length>0) {
-                        $(this).html(ui.helper.append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>'))
+                        $(this).html(ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>'))
                     } else {
-                        ui.helper.append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>')
+                        ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
                     }
                 }
             })
@@ -328,6 +332,7 @@ $.widget("bangboss.formula", {
             $(op.addField.selector+' button.add-btn', $el).click(function () {
                 var $input = $(this).prev('input'),
                     val = $input.val()
+                    if(!val)return
                 $input.val('')
                 if (val && !isNaN(val)) {
                     $(s.err, $el).html('')
@@ -340,14 +345,20 @@ $.widget("bangboss.formula", {
                     })
                     .disableSelection()
                     .click(function (e) {
-                        $(s.disp, $el).append($(this).clone().append('<span class="expr-colse" onclick="$(this).parent().remove()">&times;</span>'))
+                        $(s.disp, $el).append($(this).clone().append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>'))
                         })
                         .appendTo($(s.fields, $el))
                 } else {
-                    $(s.err,$el).html('请输入正确的常数')
+                    $(s.err, $el).html('请输入正确的常数')
+                    $.each(op._.adderr, function (i,v) {
+                        v()
+                     })
                 }
             })
     },
+    addError: function (fn) {
+        this.options._.adderr.push(fn)
+     },
     _inSymbol: function (str,bool) {
         var symbol = this.options.symbol,
             k=bool?'name':'sign'
@@ -369,8 +380,6 @@ $.widget("bangboss.formula", {
         str = this._parseSymbol(this._parseArg(str))
 
         str = str.replace(/=/g, ' = ')
-
-        console.log(str)
 
         str = $.trim(str)
         var arr = str.split(/\s+/)
@@ -419,12 +428,12 @@ $.widget("bangboss.formula", {
             var v = arr[i]
             if (v[0] == 'A') {
                 var k = v[1]
-                arr[i]= '<li data-value="'+arg[k].id+'" class="'+s.field.slice(1)+'">'+arg[k].name+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
+                arr[i]= '<li data-value="'+arg[k].id+'" class="'+s.field.slice(1)+'">'+arg[k].name+'<span class="expr-close" onclick="$(this).parent().remove()">×</span></li>'
             } else if (v[0] == 'S') {
                 var k = v[1]
-                arr[i]= '<li data-value="'+symbol[k].sign+'" class="'+s.symbol.slice(1)+'">'+(symbol[k].sign=='[sum,'?'汇总':symbol[k].sign)+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
+                arr[i]= '<li data-value="'+symbol[k].sign+'" class="'+s.symbol.slice(1)+'">'+(symbol[k].sign=='[sum,'?'∑':symbol[k].sign)+'<span class="expr-close" onclick="$(this).parent().remove()">×</span></li>'
             } else if(v!='='){
-                arr[i]= '<li data-value="'+v+'" class="'+s.field.slice(1)+'">'+v+'<span class="expr-colse" onclick="$(this).parent().remove()">×</span></li>'
+                arr[i]= '<li data-value="'+v+'" class="'+s.field.slice(1)+'">'+v+'<span class="expr-close" onclick="$(this).parent().remove()">×</span></li>'
             }
         }
         return arr
@@ -438,7 +447,6 @@ $.widget("bangboss.formula", {
                 str = str.replace(reg, ' A' + i + ' ')
             }
         }
-        console.log('parseArg '+str)
         return str
     },
     _parseSymbol: function (str) {
@@ -452,7 +460,6 @@ $.widget("bangboss.formula", {
             }
         }
 
-        console.log('parseSym ' + str)
         return str
     }
 });
