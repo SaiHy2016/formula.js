@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>公式组件</title>
-    <style>
+    <!-- <style>
         ul,li{list-style: none}
         .expr-symbol,.expr-fields{
             padding-left: 4em;
@@ -79,17 +79,27 @@
             padding: 1em;
         }
 
-    </style>
+    </style> -->
+    <link rel="stylesheet" href="css/formula.css">
 </head>
 <body>
+<<<<<<< HEAD
     <div id='container'></div>
     <p></p>
+=======
+    <div id='formula'></div>
+>>>>>>> 3050006... 组件化
     <script src='js/jquery.min.js'></script>
     <script src='js/jquery-ui.js'></script>
     <script src='js/formula.js'></script>
     <script>
+<<<<<<< HEAD
         $('#container').formula({
             // disp:'f1=f1+(123 + f2) - [sum,f3] / f1',
+=======
+        $('#formula').formula({
+            // disp:'f1=f1+(bc + f2) - [sum,f3] / f1',
+>>>>>>> 3050006... 组件化
             mode:'equation'
         })
     </script>
