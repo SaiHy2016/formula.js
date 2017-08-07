@@ -52,7 +52,8 @@
   height: 30px;
   margin-right: 10px;
   outline: none;
-  padding: 10px;
+  padding: 0 10px;
+  -moz-appearance: textfield;
 }
 .formula .add-field input::-webkit-outer-spin-button,
 .formula .add-field input::-webkit-inner-spin-button {

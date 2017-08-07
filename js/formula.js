@@ -272,7 +272,6 @@ $.widget("bangboss.formula", {
         $(s.symbol+','+s.field, $el).draggable({
             revert: "invalid",
             helper: 'clone',
-            containment: this.element,
             connectToSortable: s.disp+','+s.equ,
             zIndex:1
         }).disableSelection().click(function (e) {
@@ -371,13 +370,60 @@ $.widget("bangboss.formula", {
         }
         return false
     },
-    _parse: function (str) {//解析表达式 如 1+2+[sum,e] 解析为参数下标
+    parse: function (o) {
+        var str = o.disp, $dom = o.dom instanceof $?o.dom:$(o.dom), arg = o.ops || this.options.arg, h,op=this.options,mode=o.mode,me=this
+            h=this._parse(str,arg)
+        if (mode == 'equation') {
+            var o = this._toHTML(h,mode)
+            $dom.html('<ul class="expr-equ"></ul><span class="formula-equ">=</span><ul class="expr-disp"></ul>').addClass('formula')
+                $('.expr-equ', $dom).html(o.equ).sortable({
+                    cancel: ".expr-close",
+                    // connectWith: '.expr-equ',
+                    receive: function (e, ui) {
+                        var li = ui.helper,text = li.text()
+
+                        if (me._inSymbol(text, true) && text != '∑') {
+                            li.text(li.attr('data-value')).attr('style', '')
+                        }
+                        ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
+                    }
+                })
+                $('.expr-disp', $dom).html(o.disp).sortable({
+                    cancel: ".expr-close",
+                    // connectWith: '.expr-equ',
+                    receive: function (e, ui) {
+                        var li = ui.helper,text = li.text()
+
+                        if (me._inSymbol(text, true) && text != '∑') {
+                            li.text(li.attr('data-value')).attr('style', '')
+                        }
+                        ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
+                    }
+                })
+            } else {
+                $dom.html('<ul class="expr-disp">' + this._toHTML(h, mode) + '</ul>').addClass('formula')
+                $dom.find('.expr-disp').sortable({
+                    cancel: ".expr-close",
+                    // connectWith: '.expr-equ',
+                    receive: function (e, ui) {
+                        var li = ui.helper,text = li.text()
+
+                        if (me._inSymbol(text, true) && text != '∑') {
+                            li.text(li.attr('data-value')).attr('style', '')
+                        }
+                        ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
+                    }
+                })
+            }
+
+    },
+    _parse: function (str,arg) {//解析表达式 如 1+2+[sum,e] 解析为参数下标
         var symbol = this.options.symbol
 
         str=str.replace(/[\*]/g,'×')
         str=str.replace(/[\/]/g,'÷')
 
-        str = this._parseSymbol(this._parseArg(str))
+        str = this._parseSymbol(this._parseArg(str,arg))
 
         str = str.replace(/=/g, ' = ')
 
@@ -386,9 +432,9 @@ $.widget("bangboss.formula", {
 
         return arr
     },
-    _toHTML: function (arr1) {//下标数组转换为html
-        var arr=this._doit(arr1)
-        if (this.options.mode == 'equation') {
+    _toHTML: function (arr1,mode) {//下标数组转换为html
+        var arr=this._doit(arr1),mode=mode||this.options.mode
+        if (mode == 'equation') {
             var i = $.inArray('=', arr)
             if (i == 0) {
                 return {
@@ -438,15 +484,15 @@ $.widget("bangboss.formula", {
         }
         return arr
     },
-    _parseArg: function (str) {
-        var arg = this.options.arg
-        for (var i = 0; i < arg.length; i++) {
-            var v = arg[i],
-                reg = new RegExp(v.id, 'g')
-            if (reg.test(str)) {
-                str = str.replace(reg, ' A' + i + ' ')
+    _parseArg: function (str,arg) {
+        var arg = arg || this.options.arg
+            for (var i = 0; i < arg.length; i++) {
+                var v = arg[i],
+                    reg = new RegExp(v.id, 'g')
+                if (reg.test(str)) {
+                    str = str.replace(reg, ' A' + i + ' ')
+                }
             }
-        }
         return str
     },
     _parseSymbol: function (str) {
