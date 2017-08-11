@@ -2,15 +2,9 @@ $.widget("bangboss.formula", {
      //默认参数
     options: {
         arg: [{
-                name: '数据1',
-                id: 'f1'
-            }, {
-                name: '数据2',
-                id: 'f2'
-            }, {
-                name: '数据3',
-                id: 'f3'
-            }],
+            name: '数据1',
+            id: 'f1'
+        }],
         symbol: [{
                 name: '+',
                 sign: '+'
@@ -374,49 +368,25 @@ $.widget("bangboss.formula", {
         var str = o.disp, $dom = o.dom instanceof $?o.dom:$(o.dom), arg = o.ops || this.options.arg, h,op=this.options,mode=o.mode,me=this
             h=this._parse(str,arg)
         if (mode == 'equation') {
-            var o = this._toHTML(h,mode)
+            var o = this._toHTML(h,mode,true)
             $dom.html('<ul class="expr-equ"></ul><span class="formula-equ">=</span><ul class="expr-disp"></ul>').addClass('formula')
-                $('.expr-equ', $dom).html(o.equ).sortable({
-                    cancel: ".expr-close",
-                    // connectWith: '.expr-equ',
-                    receive: function (e, ui) {
-                        var li = ui.helper,text = li.text()
-
-                        if (me._inSymbol(text, true) && text != '∑') {
-                            li.text(li.attr('data-value')).attr('style', '')
-                        }
-                        ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
-                    }
-                })
-                $('.expr-disp', $dom).html(o.disp).sortable({
-                    cancel: ".expr-close",
-                    // connectWith: '.expr-equ',
-                    receive: function (e, ui) {
-                        var li = ui.helper,text = li.text()
-
-                        if (me._inSymbol(text, true) && text != '∑') {
-                            li.text(li.attr('data-value')).attr('style', '')
-                        }
-                        ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
-                    }
-                })
+                $('.expr-equ', $dom).html(o.equ)
+                $('.expr-disp', $dom).html(o.disp)
             } else {
-                $dom.html('<ul class="expr-disp">' + this._toHTML(h, mode) + '</ul>').addClass('formula')
-                $dom.find('.expr-disp').sortable({
-                    cancel: ".expr-close",
-                    // connectWith: '.expr-equ',
-                    receive: function (e, ui) {
-                        var li = ui.helper,text = li.text()
-
-                        if (me._inSymbol(text, true) && text != '∑') {
-                            li.text(li.attr('data-value')).attr('style', '')
-                        }
-                        ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
-                    }
-                })
+                $dom.html('<ul class="expr-disp">' + this._toHTML(h, mode,true) + '</ul>').addClass('formula')
             }
 
     },
+    update: function (disp) {
+        var op=this.options,h = this._parse(disp),s=op.selector,$el=this.element
+        if (op.mode == 'equation') {
+            var o = this._toHTML(h)
+            $(s.equ, $el).html(o.equ)
+            $(s.disp, $el).html(o.disp)
+        } else {
+            $(s.disp, $el).html(this._toHTML(h))
+        }
+     },
     _parse: function (str,arg) {//解析表达式 如 1+2+[sum,e] 解析为参数下标
         var symbol = this.options.symbol
 
@@ -432,8 +402,8 @@ $.widget("bangboss.formula", {
 
         return arr
     },
-    _toHTML: function (arr1,mode) {//下标数组转换为html
-        var arr=this._doit(arr1),mode=mode||this.options.mode
+    _toHTML: function (arr1,mode,bool) {//下标数组转换为html
+        var arr=this._doit(arr1,bool),mode=mode||this.options.mode
         if (mode == 'equation') {
             var i = $.inArray('=', arr)
             if (i == 0) {
@@ -465,7 +435,7 @@ $.widget("bangboss.formula", {
             }
         }
     },
-    _doit: function (arr) {
+    _doit: function (arr,bool) {
         var op = this.options,
             arg = op.arg,
             symbol = op.symbol,
@@ -474,12 +444,24 @@ $.widget("bangboss.formula", {
             var v = arr[i]
             if (v[0] == 'A') {
                 var k = v[1]
-                arr[i]= '<li data-value="'+arg[k].id+'" class="'+s.field.slice(1)+'">'+arg[k].name+'<span class="expr-close" onclick="$(this).parent().remove()">×</span></li>'
+                if (bool) {
+                    arr[i] = '<li data-value="' + arg[k].id + '" class="' + s.field.slice(1) + '">' + arg[k].name + '</li>'
+                 } else {
+                    arr[i] = '<li data-value="' + arg[k].id + '" class="' + s.field.slice(1) + '">' + arg[k].name + '<span class="expr-close" onclick="$(this).parent().remove()">×</span></li>'
+                }
             } else if (v[0] == 'S') {
                 var k = v[1]
-                arr[i]= '<li data-value="'+symbol[k].sign+'" class="'+s.symbol.slice(1)+'">'+(symbol[k].sign=='[sum,'?'∑':symbol[k].sign)+'<span class="expr-close" onclick="$(this).parent().remove()">×</span></li>'
-            } else if(v!='='){
+                if (bool) {
+                    arr[i] = '<li data-value="' + symbol[k].sign + '" class="' + s.symbol.slice(1) + '">' + (symbol[k].sign == '[sum,' ? '∑' : symbol[k].sign) + '</li>'
+                } else {
+                    arr[i] = '<li data-value="' + symbol[k].sign + '" class="' + s.symbol.slice(1) + '">' + (symbol[k].sign == '[sum,' ? '∑' : symbol[k].sign) + '<span class="expr-close" onclick="$(this).parent().remove()">×</span></li>'
+                }
+            } else if (v != '=') {
+                if (bool){
+                arr[i]= '<li data-value="'+v+'" class="'+s.field.slice(1)+'">'+v+'</li>'
+                } else {
                 arr[i]= '<li data-value="'+v+'" class="'+s.field.slice(1)+'">'+v+'<span class="expr-close" onclick="$(this).parent().remove()">×</span></li>'
+                }
             }
         }
         return arr
