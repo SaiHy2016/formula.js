@@ -156,11 +156,17 @@ $.widget("bangboss.formula", {
                     msg: '等式左边必须要有个字段'
                 }
             }
+            if (this._inSymbol(arr[2])&&arr[2]!="("){
+                return{
+                    success: false,
+                    msg: '等式右边必须以字段、常量或者"（"开始'
+                }
+            }
             arr.splice(0,2)
         }
         if (arr.length == 0) return {
             result: true,
-            msg: ''
+            msg: '等式右边必须要有个字段'
         }
         for (var i = 0; i < arr.length; i++){
             if (this._inSymbol(arr[i])) {//运算符
@@ -360,7 +366,6 @@ $.widget("bangboss.formula", {
                 if (sym[k] == str) {
                     return true
                 }
-
         }
         return false
     },
@@ -368,7 +373,8 @@ $.widget("bangboss.formula", {
         var str = o.disp, $dom = o.dom instanceof $?o.dom:$(o.dom), arg = o.ops || this.options.arg, h,op=this.options,mode=o.mode,me=this
             h=this._parse(str,arg)
         if (mode == 'equation') {
-            var o = this._toHTML(h,mode,true)
+            var o = this._toHTML(h, mode, true)
+            console.log(o)
             $dom.html('<ul class="expr-equ"></ul><span class="formula-equ">=</span><ul class="expr-disp"></ul>').addClass('formula')
                 $('.expr-equ', $dom).html(o.equ)
                 $('.expr-disp', $dom).html(o.disp)
@@ -402,7 +408,7 @@ $.widget("bangboss.formula", {
 
         return arr
     },
-    _toHTML: function (arr1,mode,bool) {//下标数组转换为html
+    _toHTML: function (arr1,mode,bool) {//下标数组转换为html, 数组，模式，有无右上角的叉叉
         var arr=this._doit(arr1,bool),mode=mode||this.options.mode
         if (mode == 'equation') {
             var i = $.inArray('=', arr)
@@ -468,9 +474,9 @@ $.widget("bangboss.formula", {
     },
     _parseArg: function (str,arg) {
         var arg = arg || this.options.arg
-            for (var i = 0; i < arg.length; i++) {
+        for (var i = 0; i < arg.length; i++) {
                 var v = arg[i],
-                    reg = new RegExp(v.id, 'g')
+                    reg = new RegExp(v.id+'\\b', 'g')
                 if (reg.test(str)) {
                     str = str.replace(reg, ' A' + i + ' ')
                 }

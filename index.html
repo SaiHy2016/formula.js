@@ -97,7 +97,7 @@
     <script src='js/formula.js'></script>
     <script>
         $('#container').formula({
-            arg:[{name:'abc',id:'a1'}],
+            arg:[{name:'abc',id:'f1'},{name:'bbb',id:'f2'},{name:'ccc',id:'f3'},{name:'ddd',id:'f10'}],
         //    disp:'f1=f1+(100+ f2) - [sum,f3] / f2',
             mode:'equation'
         })
@@ -114,7 +114,7 @@
          })
 
         $('#container').formula('parse',{
-            disp:'f1=f1+(100+ f2) - [sum,f3] / f1',
+            disp:'f1=f10+(100+ f2) - [sum,f3] / f1',
             dom:$('#disp2'),
             // ops:[{
             //     name:'数1',
