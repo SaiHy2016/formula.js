@@ -449,14 +449,14 @@ $.widget("bangboss.formula", {
         for (var i = 0; i < arr.length; i++) {
             var v = arr[i]
             if (v[0] == 'A') {
-                var k = v[1]
+                var k = v.slice(1)
                 if (bool) {
                     arr[i] = '<li data-value="' + arg[k].id + '" class="' + s.field.slice(1) + '">' + arg[k].name + '</li>'
                  } else {
                     arr[i] = '<li data-value="' + arg[k].id + '" class="' + s.field.slice(1) + '">' + arg[k].name + '<span class="expr-close" onclick="$(this).parent().remove()">×</span></li>'
                 }
             } else if (v[0] == 'S') {
-                var k = v[1]
+                var k = v.slice(1)
                 if (bool) {
                     arr[i] = '<li data-value="' + symbol[k].sign + '" class="' + s.symbol.slice(1) + '">' + (symbol[k].sign == '[sum,' ? '∑' : symbol[k].sign) + '</li>'
                 } else {
