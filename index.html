@@ -98,7 +98,7 @@
     <script>
         $('#container').formula({
             arg:[{name:'abc',id:'f1'},{name:'bbb',id:'f2'},{name:'ccc',id:'f3'},{name:'ddd',id:'f10'}],
-        //    disp:'f1=f1+(100+ f2) - [sum,f3] / f2',
+            disp:'f1=f1+(#-100#-#-10#+ f2) - f10 / f2',
             mode:'equation'
         })
         $('#container').formula('addError',function () {
@@ -114,7 +114,8 @@
          })
 
         $('#container').formula('parse',{
-            disp:'f1=f10+(100+ f2) - [sum,f3] / f1',
+            // disp:'f1=f10+(100+ f2) - [sum,f3] / f1',
+            disp:'f1=f10+(#-100#-#-10#+ f2) - f3 / f1',
             dom:$('#disp2'),
             // ops:[{
             //     name:'数1',
@@ -130,7 +131,7 @@
             mode:'equation'
         })
 
-        $('#container').formula('update','f1=f1+f1*f1')
+        // $('#container').formula('update','f1=f1+f1*f1')
 
     </script>
 </body>

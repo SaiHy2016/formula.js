@@ -28,10 +28,12 @@ $.widget("bangboss.formula", {
             }, {
                 name: ')',
                 sign: ')'
-            }, {
-                name: '∑',
-                sign: '[sum,'
-            }],
+            }
+            // , {
+            //     name: '∑',
+            //     sign: '[sum,'
+            // }
+            ],
         addField: {
             addable: true,
             selector: '.add-field',
@@ -49,7 +51,7 @@ $.widget("bangboss.formula", {
             disp: '.expr-disp',
             err: '.expr-error'
         },
-        _:{adderr:[],save:[],saveErr:[]}
+        _: { adderr: [], save: [], saveErr: [] }
     },
     _create: function () { //初始化，控件生命周期内只运行一次
         var op = this.options,
@@ -129,6 +131,7 @@ $.widget("bangboss.formula", {
         $(s.disp+' li', this.element).each(function (i, v) {
             res.push(v.getAttribute('data-value'))
         })
+        console.log(res)
         return res
     },
     getFormulaStr: function (bool) {//bool为true时 称号和除号都转化为 * / 模式
@@ -169,6 +172,7 @@ $.widget("bangboss.formula", {
             msg: '等式右边必须要有个字段'
         }
         for (var i = 0; i < arr.length; i++){
+            if(/^#[-\d]\d*#$/g.test(arr[i])){arr[i]=1}
             if (this._inSymbol(arr[i])) {//运算符
                 // if (arr[i] == '[count,' || arr[i] == '[sum,') {
                 if ( arr[i] == '[sum,') {
@@ -215,7 +219,7 @@ $.widget("bangboss.formula", {
                 msg: '计算公式不符合运算规则'
             }
         }
-        if(typeof result=='number'&&!isNaN(result))
+        if(typeof result=='number'&&result==result)
             return {
                 success: true,
                 msg: ''
@@ -308,20 +312,18 @@ $.widget("bangboss.formula", {
                 if (me._inSymbol(text, true) && text != '∑') {
                     li.text(li.attr('data-value')).attr('style', '')
                 }
-                ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
+                var lis=$(e.target).find('li')
+                lis.not(lis.has('span')).append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
             }
         })
 
         if (op.mode == 'equation') { //等号模式
-            $(s.symbol, $el).draggable("option", "connectToSortable", s.disp);
-            $(s.equ, $el).empty().sortable({
+            // $(s.symbol, $el).draggable("option", "connectToSortable", s.disp);
+            $(s.equ, $el).empty().droppable({
                 cancel: ".expr-close",
-                receive: function (e, ui) {
-                    if ($('li', this).length>0) {
-                        $(this).html(ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>'))
-                    } else {
-                        ui.helper.append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>')
-                    }
+                accept:'.expr-fields li',
+                drop: function (e, ui) {
+                    $(this).html(ui.draggable.clone().append('<span class="expr-close" onclick="$(this).parent().remove()">&times;</span>'))
                 }
             })
         }
@@ -330,13 +332,14 @@ $.widget("bangboss.formula", {
         if(op.addField.addable)
             $(op.addField.selector+' button.add-btn', $el).click(function () {
                 var $input = $(this).prev('input'),
-                    val = $input.val()
-                    if(!val)return
+                    val = $input.val();
+                debugger
+                if(!/^[-+\d]\d*$/g.test(val)) return;
                 $input.val('')
-                if (val && !isNaN(val)) {
+                if (val) {
                     $(s.err, $el).html('')
 
-                    $('<li data-value = "' + val + '" class = "'+s.field.slice(1)+'" >' + val + '</li>').draggable({
+                    $('<li data-value = "#' + val + '#" class = "'+s.field.slice(1)+'" >' + val + '</li>').draggable({
                         revert: "invalid",
                         helper: 'clone',
                         containment: this.element,
@@ -373,15 +376,13 @@ $.widget("bangboss.formula", {
         var str = o.disp, $dom = o.dom instanceof $?o.dom:$(o.dom), arg = o.ops || this.options.arg, h,op=this.options,mode=o.mode,me=this
             h=this._parse(str,arg)
         if (mode == 'equation') {
-            var o = this._toHTML(h, mode, true)
-            console.log(o)
+            var o = this._toHTML(h,mode,true)
             $dom.html('<ul class="expr-equ"></ul><span class="formula-equ">=</span><ul class="expr-disp"></ul>').addClass('formula')
                 $('.expr-equ', $dom).html(o.equ)
                 $('.expr-disp', $dom).html(o.disp)
             } else {
                 $dom.html('<ul class="expr-disp">' + this._toHTML(h, mode,true) + '</ul>').addClass('formula')
             }
-
     },
     update: function (disp) {
         var op=this.options,h = this._parse(disp),s=op.selector,$el=this.element
@@ -399,16 +400,24 @@ $.widget("bangboss.formula", {
         str=str.replace(/[\*]/g,'×')
         str=str.replace(/[\/]/g,'÷')
 
+        var c;
+        for (; (c = /#([-\d]\d*)#/g.exec(str)) != null;){
+            str = str.replace(/#([-\d]\d*)#/, 'A' + this.options.arg.length)
+            this.options.arg.push({
+                name:c[1],
+                id:'#'+ c[1]+'#'
+            })
+        }
+
         str = this._parseSymbol(this._parseArg(str,arg))
 
         str = str.replace(/=/g, ' = ')
 
         str = $.trim(str)
         var arr = str.split(/\s+/)
-
         return arr
     },
-    _toHTML: function (arr1,mode,bool) {//下标数组转换为html, 数组，模式，有无右上角的叉叉
+    _toHTML: function (arr1,mode,bool) {//下标数组转换为html
         var arr=this._doit(arr1,bool),mode=mode||this.options.mode
         if (mode == 'equation') {
             var i = $.inArray('=', arr)
@@ -472,15 +481,15 @@ $.widget("bangboss.formula", {
         }
         return arr
     },
-    _parseArg: function (str,arg) {
+    _parseArg: function (str, arg) {
         var arg = arg || this.options.arg
-        for (var i = 0; i < arg.length; i++) {
+            for (var i = 0; i < arg.length; i++) {
                 var v = arg[i],
                     reg = new RegExp(v.id+'\\b', 'g')
                 if (reg.test(str)) {
                     str = str.replace(reg, ' A' + i + ' ')
                 }
-            }
+        }
         return str
     },
     _parseSymbol: function (str) {
@@ -493,7 +502,6 @@ $.widget("bangboss.formula", {
                 str = str.replace(/]/g, '')
             }
         }
-
         return str
     }
 });
